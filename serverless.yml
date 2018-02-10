@@ -1,0 +1,68 @@
+
+service: assignment02
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-west-2
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-west-2:*:*"
+
+functions:
+  create:
+    handler: recipes/create.create
+    events:
+      - http:
+          path: recipe
+          method: post
+          cors: true
+
+  read:
+    handler: recipes/read.read
+    events:
+      - http:
+          path: recipe
+          method: get
+          cors: true
+
+  update:
+    handler: recipes/update.update
+    events:
+      - http:
+          path: recipe/{id}
+          method: put
+          cors: true
+
+  delete:
+    handler: recipes/delete.delete
+    events:
+      - http:
+          path: recipe/{id}
+          method: delete
+          cors: true
+
+
+resources:  
+  Resources:
+    RecipeDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: recipeTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
